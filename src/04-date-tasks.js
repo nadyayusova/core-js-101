@@ -19,8 +19,8 @@
  *    'Tue, 26 Jan 2016 13:48:02 GMT' => Date()
  *    'Sun, 17 May 1998 03:00:00 GMT+01' => Date()
  */
-function parseDataFromRfc2822(/* value */) {
-  throw new Error('Not implemented');
+function parseDataFromRfc2822(value) {
+  return new Date(value);
 }
 
 /**
@@ -34,8 +34,8 @@ function parseDataFromRfc2822(/* value */) {
  *    '2016-01-19T16:07:37+00:00'    => Date()
  *    '2016-01-19T08:07:37Z' => Date()
  */
-function parseDataFromIso8601(/* value */) {
-  throw new Error('Not implemented');
+function parseDataFromIso8601(value) {
+  return new Date(value);
 }
 
 
@@ -53,8 +53,9 @@ function parseDataFromIso8601(/* value */) {
  *    Date(2012,1,1)    => true
  *    Date(2015,1,1)    => false
  */
-function isLeapYear(/* date */) {
-  throw new Error('Not implemented');
+function isLeapYear(date) {
+  const year = date.getFullYear();
+  return ((year % 4 === 0) && (year % 100 !== 0)) || (year % 400 === 0);
 }
 
 
@@ -73,8 +74,16 @@ function isLeapYear(/* date */) {
  *    Date(2000,1,1,10,0,0),  Date(2000,1,1,10,0,0,250)     => "00:00:00.250"
  *    Date(2000,1,1,10,0,0),  Date(2000,1,1,15,20,10,453)   => "05:20:10.453"
  */
-function timeSpanToString(/* startDate, endDate */) {
-  throw new Error('Not implemented');
+function timeSpanToString(startDate, endDate) {
+  const time = endDate.getTime() - startDate.getTime();
+  const diffDate = new Date(time);
+
+  const hours = diffDate.getUTCHours().toString().padStart(2, '0');
+  const minutes = diffDate.getUTCMinutes().toString().padStart(2, '0');
+  const seconds = diffDate.getUTCSeconds().toString().padStart(2, '0');
+  const ms = diffDate.getUTCMilliseconds().toString().padStart(3, '0');
+
+  return `${hours}:${minutes}:${seconds}.${ms}`;
 }
 
 
@@ -94,8 +103,26 @@ function timeSpanToString(/* startDate, endDate */) {
  *    Date.UTC(2016,3,5,18, 0) => Math.PI
  *    Date.UTC(2016,3,5,21, 0) => Math.PI/2
  */
-function angleBetweenClockHands(/* date */) {
-  throw new Error('Not implemented');
+function angleBetweenClockHands(date) {
+  // Отметка 12 часов - это 0°
+  // 1 час - 360°:12 = 30° (градусы часовой стрелки)
+  // 1 минута - 360°:60 = 6° (градусы минутной стрелки)
+  // Каждую минуту часовая стрелка смещается на 30°:60 = 0.5°
+
+  // Перевод градусов в радианы
+  // y радиан = x градусов * PI / 180;
+
+  const minutes = date.getUTCMinutes();
+  const hours = date.getUTCHours();
+
+  let hAngle = (60 * (hours % 12) + minutes) / 2;
+  hAngle = Math.min(hAngle, 360 - hAngle);
+  let mAngle = 6 * minutes;
+  mAngle = Math.min(mAngle, 360 - mAngle);
+
+  const angle = (Math.abs(hAngle - mAngle) * Math.PI) / 180;
+
+  return angle;
 }
 
 
